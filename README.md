@@ -53,10 +53,10 @@ cd GATES
 ```bash
 # For macOS systems:
 conda env create -f environment_mac.yaml
+conda activate gates
 
 # For Linux systems:
 conda env create -f environment_linux.yaml
-
 conda activate gates
 ```
 
