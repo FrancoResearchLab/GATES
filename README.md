@@ -51,7 +51,12 @@ cd GATES
 
 2. **Create and activate conda environment**:
 ```bash
-conda env create -f environment.yaml
+# For macOS systems:
+conda env create -f environment_mac.yaml
+
+# For Linux systems:
+conda env create -f environment_linux.yaml
+
 conda activate gates
 ```
 
