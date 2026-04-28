@@ -15,7 +15,11 @@ GATES (GATK Automated Tool for Exome Sequencing) is a lightweight package that f
 GATES is organized into three analytical modules: (1) preprocessing, (2) variant calling, and (3) variant annotation. Each module is run as a single command through either the command-line or graphical user interface. The primary output of each module serves as the input of the next, allowing them to be run independently or sequentially for a given sample. The only user-provided inputs required for complete sample analysis include: raw FASTQ files, a reference genome FASTA file, an exome capture interval file, and an annotation cache (discussed below). The overall GATES pipeline is illustrated in Figure 1, and the details of each module are described below.
 
 <div align="center">
-  <img src="figures/gates_workflow.png" width="900" alt="GATES Workflow">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="figures/gates_workflow_dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="figures/gates_workflow_light.png">
+    <img alt="GATES Workflow" src="figures/gates_workflow_light.png" width="900">
+  </picture>
   <p><br><i><b>Figure 1.</b> Summary schematic of the GATES pipeline sowing the preprocessing module, variant calling module with separate workflows for germline and somatic modes, and variant annotation and filtering module. Inputs and outputs are shown in blue, with each module’s output serving as the input for the next. Tools used to perform each step in the workflow are shown in italics.</i></p>
 </div>
 
