@@ -22,9 +22,10 @@ Arguments:
     -r, --reference <path>          reference FASTA file [REQUIRED]
     -m, --mode <string>             mode to run variant calling. possible values: {tumor-only, tumor-normal, germline} [REQUIRED]
     -i, --intervals <path>          BED/VCF/.interval_list/.list/.intervals file specifying exon capture intervals [REQUIRED]
-    -t, --threads <integer>         threads to use in programs that support multithreading [OPTIONAL] [1]    
 
 Options: 
+        --supp-files <path>         supporting files directory downloaded on initial run [OPTIONAL]      
+    -t, --threads <integer>         threads to use in programs that support multithreading [OPTIONAL] [1]    
     -v, --verbose                   display tool outputs
     -h, --help                      show help message                        
 EOF
@@ -39,6 +40,7 @@ MODE=""
 THREADS=1
 REFERENCE=""
 INTERVAL_LIST=""
+SUPPORTING_FILES_DIR=""
 
 # parse arguments
 OPTS=$(getopt -o t:i:m:r:vh --long tumor-bam:,normal-bam:,threads:,intervals:,mode:,reference:,verbose,help -n "$0" -- "$@") || exit 1
@@ -50,6 +52,7 @@ while true; do
     --tumor-bam) TUMOR_BAM="$2"; shift 2 ;;
     --normal-bam) NORMAL_BAM="$2"; shift 2 ;;
     -r | --reference) REFERENCE="$2"; shift 2 ;;
+    --supp-files) SUPPORTING_FILES_DIR="$2"; shift 2 ;;
     -m | --mode) MODE="$2"; shift 2 ;;
     -t | --threads) THREADS="$2"; shift 2 ;;
     -i | --intervals) INTERVAL_LIST="$2"; shift 2 ;;
@@ -109,6 +112,14 @@ if [[ "$MODE" == "tumor-normal" ]]; then
   fi
   if [[ ! -f "$NORMAL_BAM" ]]; then
     echo "[ERROR] Normal BAM file does not exist: $NORMAL_BAM"
+    exit 1
+  fi
+fi
+
+# --supp-files
+if [[ -n "$SUPPORTING_FILES_DIR" ]]; then
+  if [[ ! -d "$SUPPORTING_FILES_DIR" ]]; then
+    echo "[ERROR] Supporting files directory does not exist: $SUPPORTING_FILES_DIR"
     exit 1
   fi
 fi

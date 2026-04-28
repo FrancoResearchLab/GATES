@@ -10,8 +10,18 @@ source "$SCRIPT_DIR/scripts/helper.sh"
 
 tumor_only_variant_calling_workflow(){
 
-# setting directories
-SUPPORTING_FILES_DIR="./supporting_files"
+# getting sample name from BAM header
+TUMOR_NAME=$(samtools samples $TUMOR_BAM | cut -f1)
+
+log "Beginning tumor-only somatic variant calling for $TUMOR_NAME"
+
+#### SETTING DIRECTORIES ####
+# setting supporting files directory if not defined by user
+if [[ -z "$SUPPORTING_FILES_DIR" ]]; then
+    SUPPORTING_FILES_DIR="./supporting_files"
+else 
+    log "Supporting files directory: $SUPPORTING_FILES_DIR"
+fi
 MUTECT2_SUPPORTING_FILES_DIR="$SUPPORTING_FILES_DIR/calling_resources"
 ANALYSIS_DIR="./tumor_only_somatic"
 MUTECT2_OUTPUT_DIR="$ANALYSIS_DIR/variants"
@@ -19,11 +29,6 @@ MUTECT2_FILTERING_DIR="$ANALYSIS_DIR/filtering_data"
 
 # making necessary directories
 mkdir -p "$MUTECT2_SUPPORTING_FILES_DIR" "$MUTECT2_OUTPUT_DIR" "$MUTECT2_FILTERING_DIR"
-
-# getting sample name from BAM header
-TUMOR_NAME=$(samtools samples $TUMOR_BAM | cut -f1)
-
-log "Beginning tumor-only somatic variant calling for $TUMOR_NAME"
 
 #### DOWNLOADING NECESSARY MUTECT2 PON AND GENOMEAD FILES ####
 log "Downloading necessary supporting files for Mutect2..."

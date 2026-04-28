@@ -19,10 +19,11 @@ Arguments:
         --fastq1 <path>             forward FASTQ file [REQUIRED]
         --fastq2 <path>             reverse FASTQ file [REQUIRED]
     -r, --reference <path>          reference hg38/GRCh38 FASTA file [REQUIRED]
-    -i, --intervals <path>          BED/VCF/.interval_list/.list/.intervals file specifying exon capture intervals [REQUIRED]
-    -t, --threads <integer>         threads to use in programs that support multithreading [OPTIONAL] [1]    
+    -i, --intervals <path>          BED/VCF/.interval_list/.list/.intervals file specifying exon capture intervals [REQUIRED] 
 
 Options: 
+        --supp-files <path>         supporting files directory downloaded on initial run [OPTIONAL] 
+    -t, --threads <integer>         threads to use in programs that support multithreading [OPTIONAL] [1]
     -v, --verbose                   display tool outputs
     -h, --help                      show help message                        
 EOF
@@ -37,6 +38,7 @@ FQ2=""
 THREADS=1
 REFERENCE=""
 INTERVAL_LIST=""
+SUPPORTING_FILES_DIR=""
 
 # parse arguments
 OPTS=$(getopt -o s:t:i:r:vh --long sample-name:,fastq1:,fastq2:,threads:,intervals:,reference:,verbose,help -n "$0" -- "$@") || exit 1
@@ -49,6 +51,7 @@ while true; do
     --fastq1) FQ1="$2"; shift 2 ;;
     --fastq2) FQ2="$2"; shift 2 ;;
     -r | --reference) REFERENCE="$2"; shift 2 ;;
+    --supp-files) SUPPORTING_FILES_DIR="$2"; shift 2 ;;
     -t | --threads) THREADS="$2"; shift 2 ;;
     -i | --intervals) INTERVAL_LIST="$2"; shift 2 ;;
     -v | --verbose) VERBOSE=1; shift ;;
@@ -102,6 +105,14 @@ fi
 if [[ ! -f "$FQ2" ]]; then
   echo "[ERROR] FASTQ file does not exist: $FQ2"
   exit 1
+fi
+
+# --supp-files
+if [[ -n "$SUPPORTING_FILES_DIR" ]]; then
+  if [[ ! -d "$SUPPORTING_FILES_DIR" ]]; then
+    echo "[ERROR] Supporting files directory does not exist: $SUPPORTING_FILES_DIR"
+    exit 1
+  fi
 fi
 
 # setting start 

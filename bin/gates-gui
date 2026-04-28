@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# GATES GUI: Graphical User Interface for GATK Automated Tool for Exome Sequencing
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Run the Python GUI script
+python3 "$SCRIPT_DIR/scripts/gates_gui.py" "$@"

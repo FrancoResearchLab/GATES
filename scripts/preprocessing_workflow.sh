@@ -8,16 +8,21 @@ source "$SCRIPT_DIR/scripts/helper.sh"
 
 preprocess_workflow() {
 
-# setting directories
-SUPPORTING_FILES_DIR="./supporting_files"
+log "Starting preprocessing for $SAMPLE_NAME"
+
+#### SETTING DIRECTORIES ####
+# setting supporting files directory if not defined by user
+if [[ -z "$SUPPORTING_FILES_DIR" ]]; then
+    SUPPORTING_FILES_DIR="./supporting_files"
+else 
+    log "Supporting files directory: $SUPPORTING_FILES_DIR"
+fi
 PREPROCESSING_DIR="./preprocessing"
 BQSR_DB_DIR="$SUPPORTING_FILES_DIR/preprocessing_resources"
 BQSR_OUT_DIR="$PREPROCESSING_DIR/bqsr_output"
 MAPPED_READS_DIR="$PREPROCESSING_DIR/mapped_reads"
 QC_DIR="$PREPROCESSING_DIR/qc"
 TRIMMED_DIR="$PREPROCESSING_DIR/trimmed_reads" 
-
-log "Starting preprocessing for $SAMPLE_NAME"
     
 # making necessary directories
 mkdir -p "$BQSR_DB_DIR" "$BQSR_OUT_DIR" "$MAPPED_READS_DIR" "$QC_DIR" "$TRIMMED_DIR"

@@ -1,51 +1,32 @@
-# GATES: GATK Automated Tool for Exome Sequencing
+<div align="center">
+  <img src="figures/gates_logo.png" width="400" alt="GATES Logo">
+</div>
 
-GATES is a package for fully automated whole-exome sequencing (WES) analysis, focused on pathogenic variant discovery. It implements GATK Best Practices through a simplified command-line interface, supporting both somatic and germline variant discovery. Built for researchers without extensive computational expertise, GATES is lightweight and runs end-to-end on a standard laptop. From raw FASTQ files to filtered variants, GATES makes WES analysis accessible, reproducible, and reliable.
+## About GATES
 
-## Package Overview
+GATES (GATK Automated Tool for Exome Sequencing) is a lightweight package that fully automates whole-exome sequencing (WES) analysis in a few simple commands. From raw FASTQ files, GATES implements the GATK Best Practices for somatic and germline variant detection and leverages Ensembl’s Variant Effect Predictor for functional annotation, outputting the results in a human-readable tab-separated values (TSV) file. With both command-line and graphical user interfaces and the ability to run on a standard laptop, GATES makes WES analysis accessible to researchers regardless of their computational experience.    
 
-### Sample Preprocessing
-GATES supports comprehensive WES sample preprocessing with a single command and minimal user inputs, allowing users to easily go from raw FASTQ files to analysis-ready BAM files. These files can be visualized in IGV and used as direct inputs for downstream variant calling. GATES preprocessing includes: 
-   - Read alignment utilizing BWA-MEM
-   - Duplicate marking and BAM file sorting
-   - Base quality score recalibration
+## Pipeline Overview
 
-### Variant Calling
-GATES supports comprehensive WES variant calling and filtering with a single command, allowing users to easily go from preprocessed BAM files to variants in the VCF format. Users can call variants on preprocessed BAM files in different modes, depending on experimental question and sample availability. GATES supports:
-1. **Tumor-Only Somatic Variant Calling**
-   - Somatic variant calling on non-paired tumor sample using Mutect2
-   - Automatically downloads and utilizes public panel of normals to identify technical artifacts
-   - Automatically downloads and utilizes germline resource to exclude common germline variants
-   - Estimates contamination and read orientation bias modeling for variant filtering
-  
-2. **Tumor-Normal Somatic Variant Calling**
-   - Somatic variant calling with tumor sample and paired-normal using Mutect2
-   - Automatically downloads and utilizes public panel of normals to identify technical artifacts
-   - Automatically downloads and utilizes germline resource to exclude common germline variants
-   - Estimates contamination and read orientation bias modeling for variant filtering
+GATES is organized into three analytical modules: (1) preprocessing, (2) variant calling, and (3) variant annotation. Each module is run as a single command through either the command-line or graphical user interface. The primary output of each module serves as the input of the next, allowing them to be run independently or sequentially for a given sample. The only user-provided inputs required for complete sample analysis include: raw FASTQ files, a reference genome FASTA file, an exome capture interval file, and an annotation cache (discussed below). The overall GATES pipeline is illustrated in Figure 1, and the details of each module are described below.
 
-3. **Germline Variant Calling**
-   - Germline variant calling using HaplotypeCaller
-   - Variant filtering using GATK-recommended hard filtering thresholds
-
-### Variant Annotation
-GATES leverages Ensembl's Variant Effect Predictor (VEP) to annotate variants with functional consequences, population frequencies, and SIFT and PolyPhen predictions. GATES automatically filters out synonymous and intronic, as well as filters common SNPs based on a user-defined population allele frequency. The annotation workflow takes VCF files from variant calling and produces both annotated VCFs and an easy-to-parse table of potential pathogenic variants.
-
-GATES automatically manages all reference databases and supporting files, requiring only input FASTQ files, a reference genome file, capture intervals, and an annotation file to run. The package uses Conda for dependency management, ensuring reproducible analyses across different systems.
+<div align="center">
+  <img src="figures/gates_workflow.png" width="900" alt="GATES Workflow">
+  <p><br><i><b>Figure 1.</b> Summary schematic of the GATES pipeline sowing the preprocessing module, variant calling module with separate workflows for germline and somatic modes, and variant annotation and filtering module. Inputs and outputs are shown in blue, with each module’s output serving as the input for the next. Tools used to perform each step in the workflow are shown in italics.</i></p>
+</div>
 
 ## Installation
 
-### Prerequisites
+### Requirements
+- Linux or macOS
 - [Conda](https://docs.conda.io/en/latest/miniconda.html)
-- Linux or macOS system
-- At least 16 GB RAM recommended
-- Sufficient disk space for reference files and output files (~50 GB)
-
-### Install from GitHub
+- Python (to use GUI)
+  
+### Install GATES
 
 1. **Clone this repository**:
 ```bash
-git clone https://github.com/nicobambach/GATES.git
+git clone https://github.com/FrancoResearchLab/GATES.git
 cd GATES
 ```
 
@@ -62,7 +43,7 @@ conda activate gates
 
 3. **Make scripts executable**:
 ```bash
-chmod +x bin/gates scripts/*.sh
+chmod +x bin/* scripts/*
 ```
 
 4. **Add GATES to PATH permanently**
@@ -87,9 +68,15 @@ gates --help
 
 ## Usage
 
-Always create and `cd` into a new project directory before running GATES. For new projects using GATES, it is recommended to move the GATES-generated `supporting_files/` directory to the new project directory for decreased run-times (discussed in detail below).
+### Graphical User Interface (GUI)
+To launch the GATES GUI, simply double-click the `gates-gui` file located within the `GATES/bin/` directory, or run the following command in your terminal: 
+```bash 
+gates-gui
+```
 
-### Example Tumor-Only Somatic Variant Analysis
+### Command-Line Interface (CLI)
+
+#### Tumor-Only Somatic Variant Analysis
 ```bash
 # Preprocessing
 gates preprocess \
@@ -118,7 +105,7 @@ gates annotate \
     --pop-af 0.01
 ```
 
-### Example Tumor-Normal Somatic Variant Analysis
+#### Tumor-Normal Somatic Variant Analysis
 ```bash
 # Preprocessing
 gates preprocess \
@@ -156,7 +143,7 @@ gates annotate \
     --pop-af 0.01
 ```
 
-### Example Germline Variant Analysis
+#### Germline Variant Analysis
 ```bash
 # Preprocessing
 gates preprocess \
@@ -184,43 +171,71 @@ gates annotate \
     --reference hg38.fa \
     --pop-af 0.01
 ```
-> Note: For germline analysis, use `--tumor-bam` to specify your sample BAM file. This parameter name is used across all modes for consistency.
+> Note: For germline analysis, use `--tumor-bam` to specify your sample BAM file, regardless of whether it is a tumor or normal sample.
 
-### Command Reference
+## Module Descriptions and Command Reference
 
-#### `gates preprocess`
-Runs the preprocessing pipeline including alignment, duplicate marking, and BQSR.
+### Preprocessing
+The preprocessing module takes paired-end WES FASTQ files and outputs aligned, analysis-ready BAM files. These files can be used to visualize read alignments and also serve as the input for the variant calling module. The preprocessing module includes: 
+- Pre-alignment QC and adapter trimming
+- Alignment to reference genome
+- Duplicate marking and BAM file sorting
+- Base quality score recalibration
+- Post-alignment QC
+
 ```
+Usage: gates preprocess [arguments] [options]
+
 Arguments: 
     -s, --sample-name <string>      sample identifier [REQUIRED]
         --fastq1 <path>             forward FASTQ file [REQUIRED]
         --fastq2 <path>             reverse FASTQ file [REQUIRED]
     -r, --reference <path>          reference hg38/GRCh38 FASTA file [REQUIRED]
-    -i, --intervals <path>          BED/VCF/.interval_list/.list/.intervals file specifying exon capture intervals [REQUIRED]
-    -t, --threads <integer>         threads to use in programs that support multithreading [OPTIONAL] [1]    
+    -i, --intervals <path>          BED/VCF/.interval_list/.list/.intervals file specifying exon capture intervals [REQUIRED] 
 
 Options: 
+        --supp-files <path>         supporting files directory downloaded on initial run [OPTIONAL] 
+    -t, --threads <integer>         threads to use in programs that support multithreading [OPTIONAL] [1]
     -v, --verbose                   display tool outputs
-    -h, --help                      show help message  
+    -h, --help                      show help message    
 ```
 
-#### `gates call`
-Runs the calling pipeline including variant identification and filtering. 
+### Variant Calling
+The variant calling modules takes aligned BAM files and outputs VCF files containing raw variants. These files serve at the input for the variant annotation module. GATES supports variant calling in three different modes: paired tumor-normal somatic, tumor-only somatic, and germline. The variant calling module includes the following, based on calling mode:
+
+*Somatic Variant Calling*
+- Variant calling using Mutect2 (with or without paired-normal sample)
+- Filtering using pre-compiled panel of normals and common germline variants
+- Filtering based on contamination estimates and read-orientation biases
+  
+*Germline Variant Calling*
+- Variant calling using HaplotypeCaller
+- Seperate hard filtering for SNP and INDEL variants
+
 ```
+Usage: gates call [arguments] [options]
+
 Arguments: 
         --tumor-bam <path>          preprocessed tumor BAM file [REQUIRED]
         --normal-bam <path>         preprocessed normal BAM file [REQUIRED if --mode tumor-normal]
     -r, --reference <path>          reference FASTA file [REQUIRED]
-    -m, --mode <string>             mode to run pipeline. possible values: {tumor-only, tumor-normal, germline} [REQUIRED]
+    -m, --mode <string>             mode to run variant calling. possible values: {tumor-only, tumor-normal, germline} [REQUIRED]
     -i, --intervals <path>          BED/VCF/.interval_list/.list/.intervals file specifying exon capture intervals [REQUIRED]
-    -t, --threads <integer>         threads to use in programs that support multithreading [OPTIONAL] [1]    
 
 Options: 
+        --supp-files <path>         supporting files directory downloaded on initial run [OPTIONAL]      
+    -t, --threads <integer>         threads to use in programs that support multithreading [OPTIONAL] [1]    
     -v, --verbose                   display tool outputs
-    -h, --help                      show help message   
+    -h, --help                      show help message     
 ```
-#### `gates annotate`
-Annotates variants and filters out common SNPs and synonymous variants. 
+
+### Variant Annotation
+The annotation module takes raw, unannotated VCF files and outputs both annotated VCFs and human-readable TSV files of potentially pathogenic variants. GATES annotates variants with gene symbols, amino acid changes, population allele frequencies, SIFT and PolyPhen predictions, rsIDs, ClinVar status, and tumor allele frequencies. The variant annotation module includes: 
+- Variant annotation using Ensembl's VEP
+- Filtering of synonymous variants
+- Filtering of common SNPs based on population allele frequencies
+- Creation of TSV table of variants
+
 ```
 Usage: gates annotate [arguments] [options]
 
@@ -240,53 +255,51 @@ Options:
 ## Input Files
 
 ### Preprocessing Input
-1. Paired-end FASTQ files (required)
-2. Reference hg38/GRCh38 FASTA file (required)
-3. Capture interval file: BED file or interval list defining exon capture regions (required)
+1. Paired-end FASTQ files
+2. Reference hg38/GRCh38 FASTA file
+3. Capture interval file: BED file or interval list defining exon capture regions
 
 ### Variant Calling Input
-1. Preprocessed BAM file(s) (required) (produced by `gates preprocess`)
-2. Reference hg38/GRCh38 FASTA file (required)
-3. Capture interval file: BED file or interval list defining exon capture regions (required)
+1. Preprocessed BAM file(s) (produced by `gates preprocess`)
+2. Reference hg38/GRCh38 FASTA file
+3. Capture interval file: BED file or interval list defining exon capture regions
 
 ### Variant Annotation Input
-1. VCF file (required) (produced by `gates call`)
-2. VEP cache (required) (the input path should point to the directory that contains the cache, not the cache itself)
-3. Reference hg38/GRCh38 FASTA file (required)
+1. VCF file (produced by `gates call`)
+2. VEP cache (the input path should point to the directory that contains the cache, not the cache itself)
+3. Reference hg38/GRCh38 FASTA file 
 
 ### Downloading VEP cache file
-The VEP cache file should be downloaded from Ensembl via the following link: https://ftp.ensembl.org/pub/release-115/variation/indexed_vep_cache/homo_sapiens_refseq_vep_115_GRCh38.tar.gz. The cache downloads as a .tar.gz file and must be extracted and decompressed before use. This can be done on macOS by doube clicking on the file. The file is ~25 GB.
+The VEP cache file should be downloaded from Ensembl via the following link: https://ftp.ensembl.org/pub/release-115/variation/indexed_vep_cache/homo_sapiens_refseq_vep_115_GRCh38.tar.gz. The cache downloads as a .tar.gz file that must be extracted and decompressed before running GATES. The file is ~25 GB.
 
 ### Automatically Downloaded Resources
 GATES automatically downloads and organizes the following reference databases that are used during preprocessing and variant calling:
-1. Mills_and_1000G_gold_standard.indels.hg38.vcf.gz(.tbi) (downloaded and used during `gates preprocess`)
-2. Homo_sapiens_assembly38.known_indels.vcf.gz(.tbi) (downloaded and used during `gates preprocess`)
-3. Homo_sapiens_assembly38.dbsnp138.vcf(.idx) (downloaded and used during `gates preprocess`)
-4. 1000g_pon.hg38.vcf.gz(.tbi) (downloaded and used during `gates call`)
-5. af-only-gnomad.hg38.vcf.gz(.tbi) (downloaded and used during `gates call`)
-6. small_exac_common_3.hg38.vcf.gz(.tbi) (downloaded and used during `gates call`)
+1. Mills_and_1000G_gold_standard.indels.hg38.vcf.gz(.tbi) (downloaded and used during preprocessing)
+2. Homo_sapiens_assembly38.known_indels.vcf.gz(.tbi) (downloaded and used during preprocessing)
+3. Homo_sapiens_assembly38.dbsnp138.vcf(.idx) (downloaded and used during preprocessing)
+4. 1000g_pon.hg38.vcf.gz(.tbi) (downloaded and used during variant calling)
+5. af-only-gnomad.hg38.vcf.gz(.tbi) (downloaded and used during variant calling)
+6. small_exac_common_3.hg38.vcf.gz(.tbi) (downloaded and used during calling)
 
-These files are stored in the `supporting_files/` folder in the project directory. To speed up subsequent GATES runs, keep these files in your project directory. GATES will automatically detect existing files and only re-download when necessary. You can move the entire `supporting_files/` folder to new project directories to avoid re-downloading these large files. 
+These files are stored in the `supporting_files/` folder in the project directory. To speed up subsequent GATES runs and prevent redownloading of these files, you can simply point to an already existing `supporting_files/` directory using the `--supp-files` argument in your command (or via the "Supporting Files" browse button in the GATES GUI). GATES will automatically detect existing files and skip their download.
 
 ## Output Files
 
 ### Preprocessing Outputs
-After running `gates preprocess`, the project directory is now organized as follows: 
+After running `gates preprocess`, the aligned BAM file and QC report are found in the following directories: 
 ```
 project_directory/
 ├── preprocessing/
 │   ├── mapped_reads/
 │   │   ├── SAMPLE_NAME_recal.bam
 │   │   └── SAMPLE_NAME_recal.bai
-│   └── bqsr_output/
-├── supporting_files/
-│   └── preprocessing_resources/
-└── YYYY-MM-DD_HH-MM-SS_gates.log 
+│   └── qc/
+│       └── SAMPLE_NAME_multiqc_report.html
 ```
-`gates preprocess` generates a fully preprocessed BAM file (aligned, sorted, duplicate-marked, and BQSR-adjusted) that is now ready for variant calling. The outputted BAM file(s) from preprocessing runs are used as inputs for variant calling using `gates call`. It is important to keep the `*.bai` file in the same directory as the BAM file as it is needed for many downstream tools. These index files are also necessary for viewing the preprocessed BAM in IGV. 
+It is important to keep the `*.bai` file in the same directory as the BAM file as it is needed for many downstream tools. These index files are also necessary for viewing the preprocessed BAM in visualization programs. 
 
 ### Variant Calling Outputs
-After running `gates call`, the project directory is now organized as follows:
+After running `gates call`, the VCF files are found in the following directory:
 ```
 project_directory/
 ├── preprocessing/
@@ -294,17 +307,11 @@ project_directory/
 │   └── variants/
 │       ├── SAMPLE_NAME_all_germline_variants.vcf.gz
 │       └── SAMPLE_NAME_passed_germline_variants.vcf.gz
-├── supporting_files/
-│   ├── preprocessing_resources/
-│   └── calling_resources/
-└── YYYY-MM-DD_HH-MM-SS_gates.log 
 ```
-`gates call` generates files containing variants called by either Mutect2 (somatic) or HaplotypeCaller (germline) in the VCF file format. The output folder is named based on analysis mode (`germline/`, `tumor_only_somatic/`, or `tumor_normal_somatic/`) and VCF file names include whether called variants are germline or somatic. 
-
-Variants are automatically filtered based on GATK-recommended parameters for germline and somatic variant discovery. `SAMPLE_NAME_passed_*_variants.vcf.gz` contains only variants that passed filtering, representing high-confidence calls. `SAMPLE_NAME_all_*_variants.vcf.gz` includes both passing and non-passing variants with the `FILTER` field annotated based on which filtering criteria each variant did not pass. This file may be useful for quality control, however, it is recommended to use only passing variants for downstream analysis. 
+The output folder is named based on analysis mode (`germline/`, `tumor_only_somatic/`, or `tumor_normal_somatic/`) and VCF file names indicate whether whether called variants are germline or somatic. `SAMPLE_NAME_passed_*_variants.vcf.gz` contains only variants that passed filtering, representing high-confidence calls. `SAMPLE_NAME_all_*_variants.vcf.gz` includes both passing and non-passing variants with the `FILTER` field annotated based on which filtering criteria each variant did not pass. This file may be useful for quality control, however, it is recommended to use only passing variants for downstream analysis. 
 
 ### Annotation Outputs
-After running `gates annotate`, the project directory is now organized as follows:
+After running `gates annotate`, the annotated VCF and TSV files are found in the following directory:
 ```
 project_directory/
 ├── preprocessing/
@@ -315,45 +322,25 @@ project_directory/
 │           ├── SAMPLE_NAME_rare_nonsyn_variants.vcf
 │           ├── SAMPLE_NAME_rare_nonsyn_variants.tsv
 │           └── SAMPLE_NAME_vep_stats.html
-├── supporting_files/
-└── YYYY-MM-DD_HH-MM-SS_gates.log 
 ``` 
-`gates annotate` generates annotated VCF and TSV files containing variants comprehensive functional annotations, including gene names, amino acid changes, predicted pathogenicity (SIFT and PolyPhen), allele frequencies, etc. The output folder contains a VCF file containing all variants with their functional annotations, as well as a VCF and TSV file filtered to only contain non-synonymous variants that are present below the specified population allele frequency threshold. These files contain variants most likely to be pathogenic. The TSV file is automatically formatted for easy visualization in Excel.
+`SAMPLE_NAME_all_variants_annotated.vcf` contains all variants with their functional annotations. `SAMPLE_NAME_rare_nonsyn_variants.vcf` and `SAMPLE_NAME_rare_nonsyn_variants.tsv` contain non-synonymous variants that are present below the user-specified population allele frequency threshold, representing alterations that are most likley to be pathogenic. The TSV file is automatically formatted for easy visualization in Excel.
 
-## Dependencies
-
-All dependencies are automatically managed through conda via the environment.yaml file. It is essential to create the gates conda environment using this .yaml file. 
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Memory errors**: Increase available RAM or reduce thread count
-2. **Download failures**: Check internet connection and retry
-3. **Permission errors**: Ensure scripts are executable (`chmod +x`)
-4. **Path issues**: Verify conda environment activation
-
-### Log Files
-GATES creates timestamped log files for each run. Check these for detailed error messages:
+## Log Files
+GATES generates timestamped log files for each run that are stored in the project directory. Check these for detailed error messages:
 ```bash
 ls *.log
-tail -50 YYYY-MM-DD_HH-MM-SS_gates.log
+tail -50 YYYY-MM-DD_HH-MM-SS_gates_preprocess.log
 ```
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Support
-
-- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/nicobambach/gates/issues)
-- **Documentation**: Check this README and command help (`gates --help`, `gates preprocess --help`, `gates call --help`)
-
 ## Citation
 
 If you use GATES in your research, please cite:
 
 ```
-Bambach, NE (2025). GATES: GATK Automated Tool for Exome Sequencing v1.1.0. 
-GitHub. https://github.com/nicobambach/gates
+Bambach, NE (2026). GATES: GATK Automated Tool for Exome Sequencing v1.3.0. 
+GitHub. https://github.com/FrancoResearchLab/GATES
 ```
