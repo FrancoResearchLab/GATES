@@ -1,7 +1,10 @@
 <div align="center">
-  <img src="figures/gates_logo.png" width="400" alt="GATES Logo">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="figures/gates_logo_dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="figures/gates_logo_light.png">
+    <img alt="GATES Logo" src="figures/gates_logo_light.png" width="400">
+  </picture>
 </div>
-
 ## About GATES
 
 GATES (GATK Automated Tool for Exome Sequencing) is a lightweight package that fully automates whole-exome sequencing (WES) analysis in a few simple commands. From raw FASTQ files, GATES implements the GATK Best Practices for somatic and germline variant detection and leverages Ensembl’s Variant Effect Predictor for functional annotation, outputting the results in a human-readable tab-separated values (TSV) file. With both command-line and graphical user interfaces and the ability to run on a standard laptop, GATES makes WES analysis accessible to researchers regardless of their computational experience.    
