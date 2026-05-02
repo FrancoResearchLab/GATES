@@ -41,7 +41,7 @@ INTERVAL_LIST=""
 SUPPORTING_FILES_DIR=""
 
 # parse arguments
-OPTS=$(getopt -o s:t:i:r:vh --long sample-name:,fastq1:,fastq2:,threads:,intervals:,reference:,verbose,help -n "$0" -- "$@") || exit 1
+OPTS=$(getopt -o s:t:i:r:vh --long sample-name:,fastq1:,fastq2:,threads:,intervals:,reference:,supp-files:,verbose,help -n "$0" -- "$@") || exit 1
 eval set -- "$OPTS"
 
 # setting variables based on inputted arguments

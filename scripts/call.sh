@@ -43,7 +43,7 @@ INTERVAL_LIST=""
 SUPPORTING_FILES_DIR=""
 
 # parse arguments
-OPTS=$(getopt -o t:i:m:r:vh --long tumor-bam:,normal-bam:,threads:,intervals:,mode:,reference:,verbose,help -n "$0" -- "$@") || exit 1
+OPTS=$(getopt -o t:i:m:r:vh --long tumor-bam:,normal-bam:,threads:,intervals:,mode:,reference:,supp-files:,verbose,help -n "$0" -- "$@") || exit 1
 eval set -- "$OPTS"
 
 # setting variables based on inputted arguments
