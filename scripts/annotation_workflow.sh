@@ -74,7 +74,7 @@ fi
 PASSED_VARIANTS=$(bcftools view -H ${ANNOTATION_VARIANTS_DIR}/${SAMPLE_NAME}_rare_nonsyn_variants.vcf| wc -l)
 
 log "Finished annotating variants for $SAMPLE_NAME"
-log "Number of rare, non-synonumous variants: $PASSED_VARIANTS"
+log "Number of rare, non-synonymous variants: $PASSED_VARIANTS"
 log "Variant annotation output files:"
 log "  - ${SAMPLE_NAME}_all_variants_annotated.vcf (VCF of all variants annotated)"
 log "  - ${SAMPLE_NAME}_rare_nonsyn_variants.vcf (annotated VCF with rare, non-synonymous variants)"
