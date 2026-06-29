@@ -1,0 +1,16 @@
+name: gates
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bash>=4.0
+  - gatk4=4.6.2.0=py310hdfd78af_0
+  - bwa
+  - wget
+  - ensembl-vep>=116.0
+  - samtools
+  - bcftools
+  - fastp
+  - multiqc
+  - mosdepth

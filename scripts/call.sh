@@ -42,24 +42,50 @@ REFERENCE=""
 INTERVAL_LIST=""
 SUPPORTING_FILES_DIR=""
 
-# parse arguments
-OPTS=$(getopt -o t:i:m:r:vh --long tumor-bam:,normal-bam:,threads:,intervals:,mode:,reference:,supp-files:,verbose,help -n "$0" -- "$@") || exit 1
-eval set -- "$OPTS"
-
-# setting variables based on inputted arguments
-while true; do
+# parsing arguments
+while [[ $# -gt 0 ]]; do
   case "$1" in
-    --tumor-bam) TUMOR_BAM="$2"; shift 2 ;;
-    --normal-bam) NORMAL_BAM="$2"; shift 2 ;;
-    -r | --reference) REFERENCE="$2"; shift 2 ;;
-    --supp-files) SUPPORTING_FILES_DIR="$2"; shift 2 ;;
-    -m | --mode) MODE="$2"; shift 2 ;;
-    -t | --threads) THREADS="$2"; shift 2 ;;
-    -i | --intervals) INTERVAL_LIST="$2"; shift 2 ;;
-    -v | --verbose) VERBOSE=1; shift ;;
-    -h | --help) usage; exit 0 ;;
-    --) shift; break ;;
-    *) echo "Invalid argument"; exit 1 ;;
+    --tumor-bam)
+      TUMOR_BAM="$2"
+      shift 2
+      ;;
+    --normal-bam)
+      NORMAL_BAM="$2"
+      shift 2
+      ;;
+    -r|--reference)
+      REFERENCE="$2"
+      shift 2
+      ;;
+    -m|--mode)
+      MODE="$2"
+      shift 2
+      ;;
+    -i|--intervals)
+      INTERVAL_LIST="$2"
+      shift 2
+      ;;
+    --supp-files)
+      SUPPORTING_FILES_DIR="$2"
+      shift 2
+      ;;
+    -t|--threads)
+      THREADS="$2"
+      shift 2
+      ;;
+    -v|--verbose)
+      VERBOSE=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "[ERROR] Invalid argument: $1"
+      usage
+      exit 1
+      ;;
   esac
 done
 
