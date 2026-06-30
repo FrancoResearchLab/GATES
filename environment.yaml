@@ -9,7 +9,7 @@ dependencies:
   - bwa
   - wget
   - ensembl-vep>=116.0
-  - samtools
+  - samtools>1.0
   - bcftools
   - fastp
   - multiqc

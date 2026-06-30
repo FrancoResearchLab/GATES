@@ -1,0 +1,14 @@
+# Git files
+.gitignore
+.git
+.gitattributes
+
+# GitHub images
+figures/
+
+# Other docs
+README.md
+LICENSE
+Singularity
+Dockerfile
+.dockerignore
